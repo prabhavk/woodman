@@ -28,7 +28,7 @@ UNRESTselector.py performs model selection by fitting non-stationary non-reversi
 # Using mst-backbone
 
 ```console
-mst-backbone --seq alignment.fas --constraint_size size_of_subtree --distance_measure_for_NJ logDet --out prefix_for_output --root_supertree no
+mst-backbone --seq alignment.fas --constraint_size size_of_subtree --distance_measure_for_NJ logDet --out prefix_for_output --root_supertree yes
 ```
 Input file:
 
@@ -42,7 +42,7 @@ distance_measure_for_NJ: distance measure used for constructing NJ trees. Select
 
 out: prefix used for naming output files. Default prefix is mstbackbone_output
 
-root_supertree: Choose whether or not to root the supertree under the GMM via EM
+root_supertree: Choose whether or not to root the supertree using the GMM via EM
 
 Output files:
 
