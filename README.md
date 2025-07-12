@@ -14,9 +14,9 @@ mst-backbone has been written in C++ (requires C++ 11) and has been compiled usi
 
 
 ```console
-git clone https://github.com/prabhavk/mst-backbone-repo.git 
-cd mst-backbone-repo/
-make all
+git clone https://github.com/prabhavk/k2020.git 
+cd k2020/
+make mst-backbone
 
 ```
 
