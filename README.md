@@ -20,7 +20,7 @@ make mst-backbone
 
 ```
 
-mst-backbone constructs phylogenetic trees by constraining the search through tree-space. Tree search is performed under the general Markov model using structural EM. 
+mst-backbone constructs phylogenetic trees by constraining the search through tree-space. Tree search is performed using structural EM applied to the general Markov model. 
 
  
 UNRESTselector.py performs model selection by fitting non-stationary non-reversible non-homogeneous CT-HMM to phylogenetic trees. 
