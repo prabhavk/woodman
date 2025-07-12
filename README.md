@@ -2,7 +2,7 @@
 
 mst-backbone is a phylogeny inference program that uses minimum spanning trees to perform constrained search through tree-space. 
 
-Here is the link to the preprint describing the performance of mst-backbone 
+Here is the link to the preprint where mst-backbone is used to guide tree-search that is performed using structural EM for the general Markov model (GMM) 
 
 https://www.biorxiv.org/content/10.1101/2020.06.30.180315v1
 
