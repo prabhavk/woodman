@@ -8,7 +8,7 @@ https://www.biorxiv.org/content/10.1101/2020.06.30.180315v1
 
 # Software requirements
 
-mst-backbone has been written in C++ (requires C++ 11) and has been compiled using g++ v11.3.0 with stdlib header enabled. The code is licensed under GPL 3.
+mst-backbone has been written in C++ (requires C++ 11) and has been compiled using g++ v11.3.0 with stdlib header enabled. The code is licensed using GPL 3.
 
 # Installation
 
