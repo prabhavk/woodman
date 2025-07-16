@@ -9,7 +9,10 @@
         "matrixfunctions": "cpp",
         "dense": "cpp",
         "fstream": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "iosfwd": "cpp",
+        "iomanip": "cpp",
+        "vector": "cpp"
     },
     "jupyter.jupyterServerType": "local"
 }

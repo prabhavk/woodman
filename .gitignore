@@ -5,4 +5,6 @@ UNRESTselector
 data/
 empirical_data.tar
 empirical_data/
+pythenv/
+test_anomaly/
 

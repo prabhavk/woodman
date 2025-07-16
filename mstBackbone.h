@@ -88,8 +88,7 @@ public:
 	void ChowLiuGrouping();
 	void RootSuperTree();
 	void MSTBackboneWithRootSEMAndMultipleExternalVertices();
-	void MSTBackboneOverlappingSets();	
-	void SteinerMinimalTree();
+	void MSTBackboneOverlappingSets();
 	void MSTBackboneOnlyLocalPhylo();	
 	MSTBackbone(string sequenceFileNameToAdd, int subtreeSizeThresholdToset, string prefix_for_output_files_to_set, string distance_measure_for_NJ_to_set, bool verbose_flag_to_set, bool flag_root_supertree, string supertree_method_to_set) {
 		// MSTBackbone(string sequenceFileNameToAdd, int subtreeSizeThresholdToset, string prefix_for_output_files_to_set, bool localPhyloOnly_to_set, bool modelSelection_to_set, string modelForRooting_to_set, bool useChowLiu_toset) {
@@ -98,6 +97,9 @@ public:
 		// this->localPhyloOnly = localPhyloOnly_to_set;		
 		// this->modelForRooting = modelForRooting_to_set;		
 		start_time = chrono::high_resolution_clock::now();				
+		this->prefix_for_output_files = prefix_for_output_files_to_set;
+		// output files		
+		this->mstBackboneLogFile.open(this->prefix_for_output_files + ".mstbackbone_log");
 		this->sequenceFileName = sequenceFileNameToAdd;		
 		this->supertree_method = supertree_method_to_set;		
 		this->verbose = verbose_flag_to_set;
@@ -111,10 +113,7 @@ public:
 			cout << "Supertree will not be rooted" << endl;
 			this->mstBackboneLogFile << "Supertree will not be rooted " << endl;
 		}				
-		this->numberOfLargeEdgesThreshold = subtreeSizeThresholdToset;
-		this->prefix_for_output_files = prefix_for_output_files_to_set;
-		// output files		
-		this->mstBackboneLogFile.open(this->prefix_for_output_files + ".mstbackbone_log");
+		this->numberOfLargeEdgesThreshold = subtreeSizeThresholdToset;		
 		mstBackboneLogFile << "Constraint size is set at\t" << this->numberOfLargeEdgesThreshold << endl;
 		cout << "Constraint size is set at\t" << this->numberOfLargeEdgesThreshold << endl;
 		mstBackboneLogFile << "Prefix for output files is \t" << this->prefix_for_output_files << endl;
@@ -137,6 +136,9 @@ public:
 	    // Compute Chow-Liu tree using UNREST and get probability distribution for root position
 		this->M->SetNumberOfLargeEdgesThreshold(this->numberOfLargeEdgesThreshold);
 		this->T = new SEM(1,this->distance_measure_for_NJ,this->verbose);
+		this->T->SetStream(this->mstBackboneLogFile);
+		int numberOfInputSequences = (int) this->M->vertexMap->size();
+		this->T->numberOfObservedVertices = numberOfInputSequences;
 		this->m_start_time = std::chrono::high_resolution_clock::now();
 		// timeTakenToComputeGlobalUnrootedPhylogeneticTree -= timeTakenToComputeEdgeAndVertexLogLikelihoods;
 		cout << "Supertree method is " << this->supertree_method << endl;

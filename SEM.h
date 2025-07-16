@@ -8,6 +8,7 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <math.h>
+#include <iomanip>
 #include "MST.h"
 //#include <boost/math/tools/minima.hpp>
 using namespace Eigen;
@@ -27,7 +28,7 @@ public:
 	float vertexLogLikelihood = 0;
 	float sumOfEdgeLogLikelihoods = 0;
 	int rateCategory = 0;
-	int GCContent = 0;
+	int GCContent = 0;	
 	vector <SEM_vertex *> neighbors;
 	vector <SEM_vertex *> children;
 	SEM_vertex * parent = this;
@@ -37,7 +38,7 @@ public:
 	void RemoveParent();
 	void AddChild(SEM_vertex * v_ptr);
 	void RemoveChild(SEM_vertex * v_ptr);
-	void SetVertexLogLikelihood(float vertexLogLikelihoodToSet);
+	void SetVertexLogLikelihood(float vertexLogLikelihoodToSet);	
 	int inDegree = 0;
 	int outDegree = 0;
 	Matrix4f transitionMatrix;
@@ -960,7 +961,7 @@ public:
 	bool verbose = 0;
 	string modelForRooting;
 	map <string,unsigned char> mapDNAtoInteger;
-	map <int, SEM_vertex*> * vertexMap;	 
+	map <int, SEM_vertex*> * vertexMap;
 	vector <int> sitePatternWeights;
 	vector <vector <int> > sitePatternRepetitions;
 	vector <int> sortedDeltaGCThresholds;
@@ -973,6 +974,9 @@ public:
 	float sumOfExpectedLogLikelihoods = 0;
 	float maxSumOfExpectedLogLikelihoods = 0;
 	int h_ind = 1;
+	chrono::system_clock::time_point t_start_time;
+	chrono::system_clock::time_point t_end_time;
+	ofstream logFile;
 	SEM_vertex * root;
 	vector < pair <SEM_vertex *, SEM_vertex *>> edgesForPostOrderTreeTraversal;
 	vector < pair <SEM_vertex *, SEM_vertex *>> edgesForPreOrderTreeTraversal;	
@@ -1031,6 +1035,7 @@ public:
 	SEM_vertex * externalVertex;
 	void AddArc(SEM_vertex * from, SEM_vertex * to);
 	void RemoveArc(SEM_vertex * from, SEM_vertex * to);
+	void SetStream(ofstream& stream_to_set);
 	void ClearDirectedEdges();
 	void ClearUndirectedEdges();
 	void ClearAllEdges();
@@ -1251,6 +1256,10 @@ public:
 		delete this->cliqueT;
 	}
 };
+
+void SEM::SetStream(ofstream& stream_to_set){
+	this->logFile = stream_to_set;
+}
 
 void SEM::AddDuplicatedSequencesToRootedTree(MST_tree * M) {
 	// Store dupl seq names in uniq seq vertex
@@ -2025,11 +2034,15 @@ void SEM::WriteRootedTreeAsEdgeList(string fileName) {
 	treeFile.close();
 }
 
-void SEM::RootTreeAtAVertexPickedAtRandom() {	
+void SEM::RootTreeAtAVertexPickedAtRandom() {
+	cout << "num of observed vertices is " << this->numberOfObservedVertices << endl;	
 	int n = this->numberOfObservedVertices;
 	uniform_int_distribution <int> distribution_v(n,(2*n-3));
 	int v_ind = distribution_v(generator);
+	cout << "index of vertex selected for rooting is " << v_ind << endl;
+	cout << "number of vertices is " << this->vertexMap->size() << endl;
 	SEM_vertex * v = (*this->vertexMap)[v_ind];
+	cout << "vertex selected for rooting is " << v->id << endl;
 	this->RootTreeAtVertex(v);
 	
 }
@@ -3450,16 +3463,21 @@ void SEM::RootTreeByFittingAGMMViaEM() {
 	bool verbose = 0;	
 	logLikelihood_current = 0;
 //		this->ComputeLogLikelihood();
-//		cout << "Initial loglikelihood is " << setprecision(8) << this->logLikelihood << endl;		
+		cout << "Initial loglikelihood is " << setprecision(8) << this->logLikelihood << endl;
+		this->logFile << "Initial loglikelihood is " << setprecision(8) << this->logLikelihood << endl;
 	while (continueIterations) {
+		t_start_time = chrono::high_resolution_clock::now();
 		iter += 1;
-//			cout << "Iteration no. " << iter << endl;
+		cout << "Iteration no. " << iter << endl;
+		this->logFile << "Iteration no. " << iter << endl;
 //			cliqueTreeFileName = cliqueTreeFileNamePrefix + "_iter_" +to_string(iter);
 //			chowLiuTreeFileName = chowLiuTreeFileNamePrefix + "_iter_" +to_string(iter);
 //			MLRootedTreeFileName = MLRootedTreeFileNamePrefix + "_iter_" +to_string(iter);						
 //		1. Construct clique tree		
 		if (verbose) {
 			cout << "Construct clique tree" << endl;
+			this->logFile << "Iteration no. " << iter << endl;
+			
 		}		
 		this->ConstructCliqueTree();				
 //		this->WriteCliqueTreeToFile(cliqueTreeFileName);
@@ -4720,6 +4738,7 @@ void SEM::TransformRootedTreeToBifurcatingTree() {
 }
 
 void SEM::ClearDirectedEdges() {
+	// cout << "Resetting times visited " << endl;
 	this->ResetTimesVisited();
 	SEM_vertex * v;
 	for (pair <int, SEM_vertex *> idPtrPair : * this->vertexMap) {

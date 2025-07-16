@@ -17,7 +17,7 @@ UNRESTselector_perEdge.o: UNRESTselector_perEdge.cpp
 clean:
 	rm mst-backbone mst-backbone.o UNRESTselector_perEdge UNRESTselector_perEdge.o
 
-test:
-	./mst-backbone --seq alignment.fas --subtree_size 4 --distance_measure LogDet --out test_mstbackbone
+#test:
+#	./mst-backbone --seq alignment.fas --subtree_size 4 --distance_measure LogDet --out test_mstbackbone
 
 
