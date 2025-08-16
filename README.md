@@ -1,2 +1,2 @@
-# run the following to install woodman
-make up
+# run the following to install emtr
+make
