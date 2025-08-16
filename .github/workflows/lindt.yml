@@ -1,4 +1,4 @@
-name: Blactate
+name: lindt
 
 on:
   push:
@@ -20,14 +20,14 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install Black
+      - name: install black
         run: pip install black
 
-      - name: Run Black
+      - name: lint with black
         run: black .
 
       - name: Commit and push if changed
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Lint it black"
+          commit_message: "lint it black"
           branch: ${{ github.head_ref || github.ref_name }}
