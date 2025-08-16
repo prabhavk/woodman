@@ -1,4 +1,4 @@
-name: blacter
+name: Blactate
 
 on:
   push:
@@ -8,7 +8,7 @@ jobs:
   blacter:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # needed to push commits
+      contents: write 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,5 +29,5 @@ jobs:
       - name: Commit and push if changed
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Black linter"
+          commit_message: "Lint it black"
           branch: ${{ github.head_ref || github.ref_name }}
