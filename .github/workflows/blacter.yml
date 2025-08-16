@@ -1,11 +1,11 @@
-name: Black (auto-fix)
+name: blacter
 
 on:
   push:
   pull_request:
 
 jobs:
-  black-autofix:
+  blacter:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # needed to push commits
@@ -29,5 +29,5 @@ jobs:
       - name: Commit and push if changed
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: format with Black"
+          commit_message: "Black linter"
           branch: ${{ github.head_ref || github.ref_name }}
