@@ -7000,9 +7000,9 @@ void SEM::ComputeNJTree_may_contain_uninitialized_values() {
 }
 
 
-///...///...///...///...///...///...///... mst backbone manager ///...///...///...///...///...///...///...///...///
+///...///...///...///...///...///...///... EM manager ///...///...///...///...///...///...///...///...///
 
-class EMTR
+class EMManager
 {
 private:
 	default_random_engine generator;
@@ -7089,7 +7089,7 @@ public:
     void EMssh();
 	string EncodeAsDNA(vector<unsigned char> sequence);
 	vector<unsigned char> DecompressSequence(vector<unsigned char>* compressedSequence, vector<vector<int>>* sitePatternRepeats);
-	EMTR(string sequenceFileNameToSet, string input_format, string topologyFileNameToSet, string prefix_for_output_files, int num_repetitions, int max_iter, double conv_threshold) {			
+	EMManager(string sequenceFileNameToSet, string input_format, string topologyFileNameToSet, string prefix_for_output_files, int num_repetitions, int max_iter, double conv_threshold) {			
 		this->prefix_for_output_files = prefix_for_output_files;
 		this->emt_logFile.open(this->prefix_for_output_files + ".emt_log");		
         if (input_format == "phylip") {
@@ -7134,18 +7134,18 @@ public:
 		cout << "number of repetitions is set to " << this->num_repetitions << endl;
 		// this->m_start_time = chrono::high_resolution_clock::now();
 			}
-	~EMTR(){
+	~EMManager(){
 		delete this->P;
 		delete this->M;	
 	}
 };
 
-void EMTR::main(string init_criterion, bool root_search){
+void EMManager::main(string init_criterion, bool root_search){
 	this->P->init_criterion = init_criterion;
 	this->P->root_search = root_search;	
 }
 
-void EMTR::EMparsimony() {
+void EMManager::EMparsimony() {
     cout << "Starting EM with initial parameters set using parsimony" << endl;
 	this->P->probabilityFileName_pars = this->prefix_for_output_files + ".pars_prob";
 	this->probabilityFileName_pars = this->prefix_for_output_files + ".pars_prob";
@@ -7153,14 +7153,14 @@ void EMTR::EMparsimony() {
 }
 
 
-void EMTR::EMdirichlet() {
+void EMManager::EMdirichlet() {
 	cout << "Starting EM with initial parameters sampled from Dirichlet distribution" << endl;
 	this->P->probabilityFileName_diri = this->prefix_for_output_files + ".diri_prob";
 	this->probabilityFileName_diri = this->prefix_for_output_files + ".diri_prob";
 	this->max_log_lik_diri = this->P->EM_rooted_at_each_internal_vertex_started_with_dirichlet(this->num_repetitions);
 }
 
-void EMTR::SetprobFileforSSH() {
+void EMManager::SetprobFileforSSH() {
 	if (this->max_log_lik_pars > this->max_log_lik_diri) {
 		cout << "Initializing with Parsimony yielded higher log likelihood score" << endl;
 		this->probabilityFileName_best = this->probabilityFileName_pars;
@@ -7170,24 +7170,24 @@ void EMTR::SetprobFileforSSH() {
 	}
 }
 
-void EMTR::EMforCompleteData(){
+void EMManager::EMforCompleteData(){
 	// use MST object to compute site patterns
 
-	tie (names, sequences, sitePatternWeights, sitePatternRepetitions) = this->M->GetCompressedSequencesSiteWeightsAndSiteRepeats(idsOfVerticesForSEM);		
-	cout << "setting sequence file name, topology file name, site pattern weights, number of input sequences" << endl;
-    cout << "number of site patterns is " << sitePatternWeights.size() << endl;	
-	SEM * P = new SEM(1,this->conv_thresh,this->max_EM_iter,this->verbose);
-	P->SetStream(this->emt_logFile);
-	this->P->sequenceFileName = this->fastaFileName;
-	this->P->topologyFileName = this->topologyFileName;
-	this->P->AddSequences(sequences);
-	this->P->AddNames(names);
-	this->P->AddSitePatternWeights(sitePatternWeights);
-	this->P->SetNumberOfInputSequences(numberOfInputSequences);	
-	this->P->numberOfObservedVertices = numberOfInputSequences;
-	cout << "setting edges from topology file" << endl;		
-	// replace the following and setting edges from input topology	
-	this->P->SetEdgesFromTopologyFile();
+	// tie (names, sequences, sitePatternWeights, sitePatternRepetitions) = this->M->GetCompressedSequencesSiteWeightsAndSiteRepeats(idsOfVerticesForSEM);		
+	// cout << "setting sequence file name, topology file name, site pattern weights, number of input sequences" << endl;
+    // cout << "number of site patterns is " << sitePatternWeights.size() << endl;	
+	// SEM * P = new SEM(1,this->conv_thresh,this->max_EM_iter,this->verbose);
+	// P->SetStream(this->emt_logFile);
+	// this->P->sequenceFileName = this->fastaFileName;
+	// this->P->topologyFileName = this->topologyFileName;
+	// this->P->AddSequences(sequences);
+	// this->P->AddNames(names);
+	// this->P->AddSitePatternWeights(sitePatternWeights);
+	// this->P->SetNumberOfInputSequences(numberOfInputSequences);	
+	// this->P->numberOfObservedVertices = numberOfInputSequences;
+	// cout << "setting edges from topology file" << endl;		
+	// // replace the following and setting edges from input topology	
+	// this->P->SetEdgesFromTopologyFile();
 	
 	
 
@@ -7199,7 +7199,7 @@ void EMTR::EMforCompleteData(){
 	// repeat above operation 100 times to visualize sequence motif
 }
 
-void EMTR::EMssh() {
+void EMManager::EMssh() {
 	this->SetprobFileforSSH();
 	cout << "Starting EM with initial parameters set using Bayes rule as described in SSH paper" << endl;
 	this->P->probabilityFileName_best = this->probabilityFileName_best;
@@ -7209,14 +7209,14 @@ void EMTR::EMssh() {
     this->max_log_lik_ssh = this->P->EM_rooted_at_each_internal_vertex_started_with_SSH_par(this->num_repetitions);
 }
 
-void EMTR::SetDNAMap() {
+void EMManager::SetDNAMap() {
 	this->mapDNAtoInteger["A"] = 0;
 	this->mapDNAtoInteger["C"] = 1;
 	this->mapDNAtoInteger["G"] = 2;
 	this->mapDNAtoInteger["T"] = 3;
 }
 
-void EMTR::EMTRackboneOnlyLocalPhylo() {
+void EMManager::EMTRackboneOnlyLocalPhylo() {
 	vector <string> names;
 	vector <vector <unsigned char> > sequences;
 	vector <int> sitePatternWeights;
@@ -7371,7 +7371,7 @@ void EMTR::EMTRackboneOnlyLocalPhylo() {
 }
 
 
-void EMTR::EMTRackbone_k2020_preprint() {
+void EMManager::EMTRackbone_k2020_preprint() {
 	vector <string> names;
 	vector <vector <unsigned char> > sequences;
 	vector <int> sitePatternWeights;
@@ -7537,14 +7537,14 @@ void EMTR::EMTRackbone_k2020_preprint() {
 	this->P->WriteRootedTreeInNewickFormat(this->prefix_for_output_files + ".unrooted_newick");	
 }
 
-void EMTR::start_EMt_with_SSH_pars(int num_repetitions) {
+void EMManager::start_EMt_with_SSH_pars(int num_repetitions) {
 	this->P->EM_rooted_at_each_internal_vertex_started_with_SSH_par(num_repetitions);	
 }
 
-void EMTR::start_EMt_with_MPars(int num_repetitions){
+void EMManager::start_EMt_with_MPars(int num_repetitions){
 	this->P->EM_rooted_at_each_internal_vertex_started_with_parsimony(num_repetitions);	
 }
-void EMTR::EMTRackboneWithRootSEMAndMultipleExternalVertices() {
+void EMManager::EMTRackboneWithRootSEMAndMultipleExternalVertices() {
 	vector <string> names;
 	vector <vector <unsigned char> > sequences;
 	vector <int> sitePatternWeights;
@@ -7723,7 +7723,7 @@ void EMTR::EMTRackboneWithRootSEMAndMultipleExternalVertices() {
 }
 
 
-void EMTR::EMTRackboneWithOneExternalVertex() {
+void EMManager::EMTRackboneWithOneExternalVertex() {
 	this->P = new SEM(1,this->conv_thresh,this->max_EM_iter,this->verbose);
 	cout << "Starting MST-backbone" << endl;
 	bool subtreeExtractionPossible = 1;		
@@ -7824,7 +7824,7 @@ void EMTR::EMTRackboneWithOneExternalVertex() {
 	delete this->p;	
 }
 
-void EMTR::EMgivenInputTopology(){
+void EMManager::EMgivenInputTopology(){
 	vector <string> names;
 	vector <vector <unsigned char> > sequences;
 	vector <int> sitePatternWeights;
@@ -7851,7 +7851,7 @@ void EMTR::EMgivenInputTopology(){
 	this->P->SetEdgesFromTopologyFile();
 }
 
-vector<unsigned char> EMTR::DecompressSequence(vector<unsigned char>* compressedSequence, vector<vector<int>>* sitePatternRepeats){
+vector<unsigned char> EMManager::DecompressSequence(vector<unsigned char>* compressedSequence, vector<vector<int>>* sitePatternRepeats){
 	int totalSequenceLength = 0;
 	for (vector<int> sitePatternRepeat: *sitePatternRepeats){
 		totalSequenceLength += int(sitePatternRepeat.size());
@@ -7870,7 +7870,7 @@ vector<unsigned char> EMTR::DecompressSequence(vector<unsigned char>* compressed
 	return (decompressedSequence);	
 }
 
-string EMTR::EncodeAsDNA(vector<unsigned char> sequence){
+string EMManager::EncodeAsDNA(vector<unsigned char> sequence){
 	string allDNA = "AGTC";
 	string dnaSequence = "";
 	for (unsigned char s : sequence){
@@ -7879,7 +7879,7 @@ string EMTR::EncodeAsDNA(vector<unsigned char> sequence){
 	return dnaSequence;
 }
 
-string EMTR::GetSequenceListToWriteToFile(map <string, vector <unsigned char>> compressedSeqMap, vector <vector <int> > sitePatternRepetitions) {	
+string EMManager::GetSequenceListToWriteToFile(map <string, vector <unsigned char>> compressedSeqMap, vector <vector <int> > sitePatternRepetitions) {	
 	vector <unsigned char> decompressedSequence;
 	string dnaSequence;
 	string u_name;
@@ -7892,7 +7892,7 @@ string EMTR::GetSequenceListToWriteToFile(map <string, vector <unsigned char>> c
 	return (listOfVertexNamesAndDNAsequencesToWriteToFile);
 }
 
-int EMTR::GetEdgeIndex (int vertexIndex1, int vertexIndex2, int numberOfVertices){
+int EMManager::GetEdgeIndex (int vertexIndex1, int vertexIndex2, int numberOfVertices){
 	int edgeIndex;
 	edgeIndex = numberOfVertices*(numberOfVertices-1)/2;
 	edgeIndex -= (numberOfVertices-vertexIndex1)*(numberOfVertices-vertexIndex1-1)/2;
@@ -7900,7 +7900,7 @@ int EMTR::GetEdgeIndex (int vertexIndex1, int vertexIndex2, int numberOfVertices
 	return edgeIndex;
 }
 
-int EMTR::ComputeHammingDistance(string seq1, string seq2) {
+int EMManager::ComputeHammingDistance(string seq1, string seq2) {
 	int hammingDistance = 0;
 	for (unsigned int i=0;i<seq1.length();i++){
 		if (seq1[i] != seq2[i]){
@@ -7910,7 +7910,7 @@ int EMTR::ComputeHammingDistance(string seq1, string seq2) {
 	return (hammingDistance);
 };
 
-int EMTR::ComputeHammingDistance(vector<unsigned char> recodedSeq1, vector<unsigned char> recodedSeq2) {
+int EMManager::ComputeHammingDistance(vector<unsigned char> recodedSeq1, vector<unsigned char> recodedSeq2) {
 	int hammingDistance = 0;
 	double ungappedSequenceLength = 0;
 	for (unsigned int i=0;i<recodedSeq1.size();i++) {
@@ -7921,10 +7921,10 @@ int EMTR::ComputeHammingDistance(vector<unsigned char> recodedSeq1, vector<unsig
 	return (hammingDistance);
 };
 
-PYBIND11_MODULE(emtr, m) {
+PYBIND11_MODULE(em_main, m) {
     m.doc() = "pybind11 bindings for EMTR";
     m.def("ord_pair", &ord_pair);
-    py::class_<EMTR>(m, "EMTR")
+    py::class_<EMManager>(m, "EMManager")
         .def(py::init<
                  string,  // sequence_file
                  string,  // seq_file_format
@@ -7942,8 +7942,8 @@ PYBIND11_MODULE(emtr, m) {
              py::arg("max_iter"),
              py::arg("conv_threshold")
              )
-        .def("EMparsimony", &EMTR::EMparsimony)      
-		.def("EMdirichlet", &EMTR::EMdirichlet)
-        .def("EMssh", &EMTR::EMssh);
+        .def("EMparsimony", &EMManager::EMparsimony)      
+		.def("EMdirichlet", &EMManager::EMdirichlet)
+        .def("EMssh", &EMManager::EMssh);
     py::register_exception<mt_error>(m, "mt_error");
 }
