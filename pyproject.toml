@@ -3,7 +3,7 @@ requires = ["scikit-build-core>=0.11", "pybind11[global]>=2.11", "ninja"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "woodman"
+name = "emtr"
 version = "0.0.1"
 description = "Visualizing and Comparing EMTR log likelihood scores for the Randall dataset"
 readme = "README.md"
