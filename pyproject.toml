@@ -1,11 +1,18 @@
-[tool.black]
-line-length = 88
-target-version = ["py310"]
-exclude = '''
-/(
-  \.git
-| \.venv
-| build
-| dist
-)/
-'''
+[build-system]
+requires = ["scikit-build-core>=0.11", "pybind11>=2.11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "emtr"
+version = "0.1.0"
+description = "Visualizing EM results for the Randall experimental phylogeny"
+readme = { text = "C++ core via pybind11 plus matplotlib flower plot.", content-type = "text/markdown" }
+requires-python = ">=3.9"
+license = { text = "MPL-2.0" }
+authors = [{ name = "Prabhav Kalaghatgi", email = "prabhavk@gmail.com" }]
+dependencies = ["matplotlib>=3.7"]
+
+
+[tool.scikit-build]
+# Include Python packages under src/
+wheel.packages = ["src"]
