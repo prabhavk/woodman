@@ -7080,6 +7080,8 @@ public:
 	void EMTRackboneWithRootSEMAndMultipleExternalVertices();
 	void EMTRackboneOverlappingSets();
 	void EMTRackboneOnlyLocalPhylo();
+	void EMforCompleteData();
+	void ReadAllSequences(string complete_sequence_file_name);
 	void main(string init_criterion, bool root_search);
     void EMparsimony();
 	void EMdirichlet();
@@ -7087,11 +7089,9 @@ public:
     void EMssh();
 	string EncodeAsDNA(vector<unsigned char> sequence);
 	vector<unsigned char> DecompressSequence(vector<unsigned char>* compressedSequence, vector<vector<int>>* sitePatternRepeats);
-	EMTR(string sequenceFileNameToSet, string input_format, string topologyFileNameToSet, string prefix_for_output_files, int num_repetitions, int max_iter, double conv_threshold) {	
-		// start_time = chrono::high_resolution_clock::now();
+	EMTR(string sequenceFileNameToSet, string input_format, string topologyFileNameToSet, string prefix_for_output_files, int num_repetitions, int max_iter, double conv_threshold) {			
 		this->prefix_for_output_files = prefix_for_output_files;
-		this->emt_logFile.open(this->prefix_for_output_files + ".emt_log");
-		// this->probabilityFileName = this->prefix_for_output_files + ".prob";
+		this->emt_logFile.open(this->prefix_for_output_files + ".emt_log");		
         if (input_format == "phylip") {
             cout << "file format is phylip\n";
             this->phylipFileName = sequenceFileNameToSet;
@@ -7111,32 +7111,28 @@ public:
 		this->numberOfLargeEdgesThreshold = 100;		
 		MSTFileName = prefix_for_output_files + ".initial_MST";
 		this->SetDNAMap();
-		this->ancestralSequencesString = "";
-		// this->m_start_time = chrono::high_resolution_clock::now();
+		this->ancestralSequencesString = "";		
 		this->M = new MST();
         if (input_format == "phylip") {
             cout << "Reading phylip file\n";
             this->M->ReadPhyx(this->phylipFileName);
-        }		
-		this->M->ComputeMST();
-	
+        }
+		this->M->ComputeMST();	
 		if (false) {
 			this->M->WriteToFile(MSTFileName);
-		}		
-		// this->current_time = chrono::high_resolution_clock::now();		
-	    
+		}	    
 		int numberOfInputSequences = (int) this->M->vertexMap->size();
-		this->M->SetNumberOfLargeEdgesThreshold(this->numberOfLargeEdgesThreshold);
+		this->M->SetNumberOfLargeEdgesThreshold(this->numberOfLargeEdgesThreshold);		
 		this->P = new SEM(1,conv_threshold,max_iter,this->verbose);
 		this->P->SetStream(this->emt_logFile);		
 		this->P->numberOfObservedVertices = numberOfInputSequences;
 		this->P->logLikelihoodConvergenceThreshold = conv_threshold;
-		this->P->maxIter = max_iter;
-		// this->m_start_time = chrono::high_resolution_clock::now();
+		this->P->maxIter = max_iter;		
 		this->EMgivenInputTopology();
 		this->P->SetVertexVector();
         this->P->SetPrefixForOutputFiles(this->prefix_for_output_files);
 		cout << "number of repetitions is set to " << this->num_repetitions << endl;
+		// this->m_start_time = chrono::high_resolution_clock::now();
 			}
 	~EMTR(){
 		delete this->P;
@@ -7172,6 +7168,35 @@ void EMTR::SetprobFileforSSH() {
 		this->probabilityFileName_best = this->probabilityFileName_diri;
 		cout << "Initializing with Dirichlet yielded higher log likelihood score" << endl;
 	}
+}
+
+void EMTR::EMforCompleteData(){
+	// use MST object to compute site patterns
+
+	tie (names, sequences, sitePatternWeights, sitePatternRepetitions) = this->M->GetCompressedSequencesSiteWeightsAndSiteRepeats(idsOfVerticesForSEM);		
+	cout << "setting sequence file name, topology file name, site pattern weights, number of input sequences" << endl;
+    cout << "number of site patterns is " << sitePatternWeights.size() << endl;	
+	SEM * P = new SEM(1,this->conv_thresh,this->max_EM_iter,this->verbose);
+	P->SetStream(this->emt_logFile);
+	this->P->sequenceFileName = this->fastaFileName;
+	this->P->topologyFileName = this->topologyFileName;
+	this->P->AddSequences(sequences);
+	this->P->AddNames(names);
+	this->P->AddSitePatternWeights(sitePatternWeights);
+	this->P->SetNumberOfInputSequences(numberOfInputSequences);	
+	this->P->numberOfObservedVertices = numberOfInputSequences;
+	cout << "setting edges from topology file" << endl;		
+	// replace the following and setting edges from input topology	
+	this->P->SetEdgesFromTopologyFile();
+	
+	
+
+	// read topology	
+	// read all sequences
+	// place root at h_21
+	// Optimize GMM using complete data
+	// compute log-likelihood using 24 digits of precision
+	// repeat above operation 100 times to visualize sequence motif
 }
 
 void EMTR::EMssh() {
